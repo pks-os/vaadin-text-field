@@ -208,7 +208,9 @@ This program is available under Apache License Version 2.0, available at https:/
         }
 
         _getValue(incr) {
-          return (incr + (incr * Math.floor((parseFloat(this.value || 0) / incr).toFixed(1)))).toFixed(this.__decimals);
+          const number = parseFloat(this.value || 0);
+          const nextMultiple = parseFloat((Math.ceil(number / incr) * incr).toFixed(this.__decimals));
+          return (nextMultiple === number ? nextMultiple + incr : nextMultiple).toFixed(this.__decimals);
         }
 
         _getAllowedIncrementSign(sign) {
@@ -262,10 +264,12 @@ This program is available under Apache License Version 2.0, available at https:/
           // Validate value to be numeric
           if (newVal && isNaN(parseFloat(newVal).toFixed(this.__decimals))) {
             this.value = '';
-          } else if (!isNaN(parseFloat(this.value)) &&
+          } else if (!isNaN(parseFloat(this.value)) && this.__decimals &&
             parseFloat(this.value) !== parseFloat(parseFloat(this.value).toFixed(this.__decimals))) {
             // Validate correct decimals
-            this.value = parseFloat(parseFloat(this.value).toFixed(this.__decimals));
+            this.value = parseFloat(this.value).toFixed(this.__decimals);
+          } else if (typeof this.value !== 'string') {
+            this.value = String(this.value);
           }
 
           super._valueChanged(this.value, oldVal);
